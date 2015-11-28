@@ -6,18 +6,13 @@ type Space struct {
 	Piece    Piece
 }
 
-func getSpaceGrid(width, height int) [][]Space {
-	spaces := make([][]Space, height)
+func getEmptySpaceGrid(dimensions Coords) [][]Space {
+	spaces := make([][]Space, dimensions.Y)
 	for i := range spaces {
-		spaces[i] = make([]Space, width)
+		spaces[i] = make([]Space, dimensions.X)
 		for j := range spaces[i] {
 			spaces[i][j] = Space{}
 		}
 	}
 	return spaces
-}
-
-//Piece is a playable piece on the board
-type Piece struct {
-	HP int
 }

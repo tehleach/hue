@@ -30,7 +30,9 @@ func (c *Controller) ListGames(w http.ResponseWriter, r *http.Request, _ httprou
 //NewGame intializes a game
 func (c *Controller) NewGame(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	collection := c.DB.C("games")
-	game := Game{Board: NewBoard(5, 5)}
+	game := Game{Board: NewBoard(Coords{5, 5})}
+	game.Board.PlacePiece(Coords{0, 0})
+	game.Board.PlacePiece(Coords{4, 4})
 	if err := collection.Insert(&game); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("something went wrong"))
@@ -54,5 +56,5 @@ func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request, p httproute
 		w.Write([]byte(err.Error()))
 		return
 	}
-	fmt.Fprint(w, GetCurrentState(game.Board.Spaces))
+	fmt.Fprint(w, game.Board.GetCurrentState())
 }

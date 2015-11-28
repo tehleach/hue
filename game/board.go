@@ -4,32 +4,27 @@ package game
 import (
 	"bytes"
 
-	"gopkg.in/mgo.v2/bson"
+	"github.com/tehleach/hue/errors"
 )
-
-//Game represents game state
-type Game struct {
-	ID    bson.ObjectId `json:"id" bson:"_id,omitempty"`
-	Board Board         `bson:""`
-}
 
 //Board is a game board
 type Board struct {
-	Spaces [][]Space
+	dimensions Coords
+	Spaces     [][]Space
 }
 
 //NewBoard gets a new board
-func NewBoard(width, height int) Board {
-	return Board{getSpaceGrid(width, height)}
+func NewBoard(dimensions Coords) Board {
+	return Board{dimensions, getEmptySpaceGrid(dimensions)}
 }
 
 //GetCurrentState prints the current board state
-func GetCurrentState(spaces [][]Space) string {
+func (b *Board) GetCurrentState() string {
 	var buffer bytes.Buffer
 
-	for i := range spaces {
-		for j := range spaces[i] {
-			curSpace := spaces[i][j]
+	for i := range b.Spaces {
+		for j := range b.Spaces[i] {
+			curSpace := b.Spaces[i][j]
 			if curSpace.HasPiece {
 				buffer.WriteString("1")
 			} else {
@@ -39,4 +34,15 @@ func GetCurrentState(spaces [][]Space) string {
 		buffer.WriteString("\n")
 	}
 	return buffer.String()
+}
+
+//PlacePiece attempts to place a piece at coords
+func (b *Board) PlacePiece(coords Coords) error {
+	if coords.X >= b.dimensions.X || coords.Y >= b.dimensions.Y {
+		return errors.NewOutOfBounds("Board")
+	}
+	space := &b.Spaces[coords.X][coords.Y]
+	space.HasPiece = true
+	space.Piece = Piece{10}
+	return nil
 }
