@@ -6,7 +6,7 @@ type Space struct {
 	Piece    Piece
 }
 
-func getEmptySpaceGrid(dimensions Coords) [][]Space {
+func getEmptySpaceGrid(dimensions Vector) [][]Space {
 	spaces := make([][]Space, dimensions.Y)
 	for i := range spaces {
 		spaces[i] = make([]Space, dimensions.X)

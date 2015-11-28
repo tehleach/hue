@@ -9,12 +9,12 @@ import (
 
 //Board is a game board
 type Board struct {
-	dimensions Coords
+	dimensions Vector
 	Spaces     [][]Space
 }
 
 //NewBoard gets a new board
-func NewBoard(dimensions Coords) Board {
+func NewBoard(dimensions Vector) Board {
 	return Board{dimensions, getEmptySpaceGrid(dimensions)}
 }
 
@@ -36,12 +36,12 @@ func (b *Board) GetCurrentState() string {
 	return buffer.String()
 }
 
-//PlacePiece attempts to place a piece at coords
-func (b *Board) PlacePiece(coords Coords) error {
-	if coords.X >= b.dimensions.X || coords.Y >= b.dimensions.Y {
+//PlacePiece attempts to place a piece at vector
+func (b *Board) PlacePiece(vector Vector) error {
+	if vector.X >= b.dimensions.X || vector.Y >= b.dimensions.Y {
 		return errors.NewOutOfBounds("Board")
 	}
-	space := &b.Spaces[coords.X][coords.Y]
+	space := &b.Spaces[vector.X][vector.Y]
 	space.HasPiece = true
 	space.Piece = Piece{10}
 	return nil

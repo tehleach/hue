@@ -26,9 +26,7 @@ func main() {
 
 	router := httprouter.New()
 	router.GET("/", Index)
-	router.GET("/games", gameController.ListGames)
-	router.GET("/games/:id", gameController.GetGame)
-	router.POST("/games", gameController.NewGame)
+	gameController.SetRoutes(router)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
