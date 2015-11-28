@@ -22,8 +22,9 @@ type Controller struct {
 //SetRoutes sets the controllers routes in given router
 func (c *Controller) SetRoutes(router *httprouter.Router) {
 	router.GET("/games", c.ListGames)
-	router.GET("/games/:id", c.GetGame)
 	router.POST("/games", c.NewGame)
+	router.GET("/games/:id", c.PrintGameState)
+	router.POST("/games/:id/move", c.ApplyMove)
 }
 
 //ListGames lists all games
@@ -50,22 +51,47 @@ func (c *Controller) NewGame(w http.ResponseWriter, r *http.Request, _ httproute
 	fmt.Fprint(w, game)
 }
 
-//GetGame lists specific game
-func (c *Controller) GetGame(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	collection := c.DB.C("games")
-	var game Game
+//PrintGameState lists specific game
+func (c *Controller) PrintGameState(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	id := p.ByName("id")
-	if !bson.IsObjectIdHex(id) {
-		c.Error(w, errors.NewNotFound("Game", "ID", id))
-		return
-	}
-	if err := collection.FindId(bson.ObjectIdHex(id)).One(&game); err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			c.Error(w, errors.NewNotFound("Game", "ID", id))
-			return
-		}
+	game, err := c.findGame(id)
+	if err != nil {
 		c.Error(w, err)
 		return
 	}
 	fmt.Fprint(w, game.Board.GetCurrentState())
+}
+
+//ApplyMove applies a move to specific game
+func (c *Controller) ApplyMove(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
+	game, err := c.findGame(id)
+	if err != nil {
+		c.Error(w, err)
+		return
+	}
+	if err := game.Board.ApplyMove(Move{Vector{0, 0}, Vector{1, 1}}); err != nil {
+		c.Error(w, err)
+		return
+	}
+	if err := c.DB.C("games").UpdateId(bson.ObjectIdHex(id), game); err != nil {
+		c.Error(w, err)
+		return
+	}
+	fmt.Fprint(w, game.Board.GetCurrentState())
+}
+
+func (c *Controller) findGame(id string) (*Game, error) {
+	collection := c.DB.C("games")
+	var game Game
+	if !bson.IsObjectIdHex(id) {
+		return nil, errors.NewNotFound("Game", "ID", id)
+	}
+	if err := collection.FindId(bson.ObjectIdHex(id)).One(&game); err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil, errors.NewNotFound("Game", "ID", id)
+		}
+		return nil, err
+	}
+	return &game, nil
 }

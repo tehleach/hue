@@ -3,13 +3,14 @@ package game
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/tehleach/hue/errors"
 )
 
 //Board is a game board
 type Board struct {
-	dimensions Vector
+	Dimensions Vector
 	Spaces     [][]Space
 }
 
@@ -38,11 +39,35 @@ func (b *Board) GetCurrentState() string {
 
 //PlacePiece attempts to place a piece at vector
 func (b *Board) PlacePiece(vector Vector) error {
-	if vector.X >= b.dimensions.X || vector.Y >= b.dimensions.Y {
+	if vector.X >= b.Dimensions.X || vector.Y >= b.Dimensions.Y {
 		return errors.NewOutOfBounds("Board")
 	}
 	space := &b.Spaces[vector.X][vector.Y]
 	space.HasPiece = true
 	space.Piece = Piece{10}
+	return nil
+}
+
+//ApplyMove moves the piece according to move given
+func (b *Board) ApplyMove(move Move) error {
+	if !move.PieceCoords.InBoundsOf(b.Dimensions) {
+		fmt.Println("first ", move.PieceCoords, b.Dimensions)
+		return errors.NewOutOfBounds("Board")
+	}
+	space := &b.Spaces[move.PieceCoords.X][move.PieceCoords.Y]
+	if !space.HasPiece {
+		return errors.New("No piece at space provided")
+	}
+	piece := space.Piece
+	newLocation := move.PieceCoords.Add(move.Vector)
+	if !newLocation.InBoundsOf(b.Dimensions) {
+		fmt.Println("second ", move.PieceCoords, b.Dimensions)
+		return errors.NewOutOfBounds("Board")
+	}
+	newSpace := &b.Spaces[newLocation.X][newLocation.Y]
+	newSpace.Piece = piece
+	newSpace.HasPiece = true
+	space.Piece = Piece{}
+	space.HasPiece = false
 	return nil
 }
