@@ -37,13 +37,13 @@ func (b *Board) GetCurrentState() string {
 }
 
 //PlacePiece attempts to place a piece at vector
-func (b *Board) PlacePiece(vector Vector) error {
+func (b *Board) PlacePiece(vector Vector, ownerID int) error {
 	if vector.X >= b.Dimensions.X || vector.Y >= b.Dimensions.Y {
 		return errors.NewOutOfBounds("Board")
 	}
 	space := &b.Spaces[vector.X][vector.Y]
 	space.HasPiece = true
-	space.Piece = Piece{10}
+	space.Piece = Piece{10, ownerID}
 	return nil
 }
 
