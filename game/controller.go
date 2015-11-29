@@ -64,13 +64,20 @@ func (c *Controller) PrintGameState(w http.ResponseWriter, r *http.Request, p ht
 
 //ApplyMove applies a move to specific game
 func (c *Controller) ApplyMove(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var move Move
+	if err := c.UnmarshalBody(r, &move); err != nil {
+		c.Error(w, err)
+		return
+	}
+
 	id := p.ByName("id")
 	game, err := c.findGame(id)
 	if err != nil {
 		c.Error(w, err)
 		return
 	}
-	if err := game.Board.ApplyMove(Move{Vector{0, 0}, Vector{1, 1}}); err != nil {
+
+	if err := game.Board.ApplyMove(move); err != nil {
 		c.Error(w, err)
 		return
 	}

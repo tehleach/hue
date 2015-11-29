@@ -12,7 +12,7 @@ func MatchErrorToCode(err error) int {
 	switch err.(type) {
 	case *errors.NotFound:
 		return http.StatusNotFound
-	case *errors.OutOfBounds:
+	case *errors.OutOfBounds, *errors.JSONDecode:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError

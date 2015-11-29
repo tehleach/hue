@@ -3,7 +3,6 @@ package game
 
 import (
 	"bytes"
-	"fmt"
 
 	"github.com/tehleach/hue/errors"
 )
@@ -51,7 +50,6 @@ func (b *Board) PlacePiece(vector Vector) error {
 //ApplyMove moves the piece according to move given
 func (b *Board) ApplyMove(move Move) error {
 	if !move.PieceCoords.InBoundsOf(b.Dimensions) {
-		fmt.Println("first ", move.PieceCoords, b.Dimensions)
 		return errors.NewOutOfBounds("Board")
 	}
 	space := &b.Spaces[move.PieceCoords.X][move.PieceCoords.Y]
@@ -61,7 +59,6 @@ func (b *Board) ApplyMove(move Move) error {
 	piece := space.Piece
 	newLocation := move.PieceCoords.Add(move.Vector)
 	if !newLocation.InBoundsOf(b.Dimensions) {
-		fmt.Println("second ", move.PieceCoords, b.Dimensions)
 		return errors.NewOutOfBounds("Board")
 	}
 	newSpace := &b.Spaces[newLocation.X][newLocation.Y]
